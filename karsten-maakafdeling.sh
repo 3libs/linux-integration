@@ -62,11 +62,11 @@ fi
 # _____________________________________________________________________________________________________________
 
 
-echo -e "${CYAN}het volgende zal worden uitgevoerd:${NC}"
-echo -e "1. ${GREEN}Er zal een groep worden aangemaakt met de naam ${YELLOW}$groepsnaam${NC}${GREEN}.${NC}"
-echo -e "2. ${GREEN}Er zal een directory worden aangemaakt in de root directory met de naam ${YELLOW}$basisdir${NC}${GREEN}.${NC}"
-echo -e "3. ${GREEN}Er zullen twee subdirectories worden aangemaakt in ${YELLOW}$basisdir${NC}${GREEN}, genaamd ${YELLOW}${afdeling}-RWdocs${NC}${GREEN} en ${YELLOW}${afdeling}-ROdocs${NC}${GREEN}.${NC}"
-echo -e "${CYAN}Voer het script opnieuw uit als u deze acties wilt uitvoeren.${NC}"
+echo -e "het volgende zal worden uitgevoerd:${NC}"
+echo -e "1. Er zal een groep worden aangemaakt met de naam ${YELLOW}$groepsnaam${NC}.${NC}"
+echo -e "2. Er zal een directory worden aangemaakt in de root directory met de naam ${YELLOW}$basisdir${NC}.${NC}"
+echo -e "3. Er zullen twee subdirectories worden aangemaakt in ${YELLOW}$basisdir${NC}, genaamd ${YELLOW}${afdeling}-RWdocs${NC} en ${YELLOW}${afdeling}-ROdocs${NC}.${NC}"
+echo -e "Voer het script opnieuw uit als u deze acties wilt uitvoeren.${NC}"
 echo
 sleep 0.5
 read -p "Wilt u doorgaan? (y/n) " antwoord
