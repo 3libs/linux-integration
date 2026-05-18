@@ -1,11 +1,16 @@
 #!/bin/bash
 #
+clear
+
+
 # variables
 afdeling="$1"
 groepsnaam="${afdeling}-gr"
 voornaam="karsten"
 basisdir="/$voornaam"
 admin="${afdeling}-admin"
+user1="${afdeling}-user1"
+user2="${afdeling}-user2"
 # variables
 
 
@@ -48,17 +53,18 @@ if [ $# -eq 0 ]; then
 fi
 
 # ------------  EINDE block met checks om te controleren of het script correct word uitgevoerd ----------------
-#
+# _____________________________________________________________________________________________________________
 #
 # ---------------------- START block met de daadwerkelijke uitvoering van het script --------------------------
-# 
+# _____________________________________________________________________________________________________________
 
 
 echo -e "het volgende zal worden uitgevoerd:"
-echo -e "1. Er zal een groep worden aangemaakt met de naam."
-echo -e "2. Er zal een directory worden aangemaakt in de root directory met de naam."
-echo -e "3. Er zullen twee subdirectories worden aangemaakt in, genaamd ${afdeling}-RWdocs en ${afdeling}-ROdocs."
-echo -e "4. Er zal een admin gebruiker worden aangemaakt met de naam $admin."
+echo -e "1. Er zal een groep worden aangemaakt met de naam $groepsnaam."
+echo -e "2. Er zal een directory worden aangemaakt in de root directory met de naam $basisdir$"
+echo -e "3. Er zullen twee subdirectories worden aangemaakt in $basisdir, genaamd ${afdeling}-RWdocs en ${afdeling}-ROdocs"
+echo -e "4. Er zal een admin gebruiker worden aangemaakt met de naam $admin"
+echo -e "5. Er zullen twee gebruikers worden aangemaakt: $user1 en $user2"
 echo -e "Voer het script opnieuw uit als u deze acties wilt uitvoeren."
 echo
 sleep 0.5
@@ -146,9 +152,37 @@ chage -M 40 "$admin"
 echo "paswoordbeleid ingesteld voor $admin."
 
 
-# voeg de admin toe aan de groep
-usermod -aG "$groepsnaam" "$admin"
-echo "gebruiker $admin is lid van groep $groepsnaam."
+# maakt de twee gewone gebruikers aan met een uid vanaf 2500
+# -K UID_MIN=2500 overschrijft de standaard minimumwaarde uit /etc/login.defs zodat useradd een uid vanaf 2500 kiest
+for gebruiker in "$user1" "$user2"; do
+    if id "$gebruiker" &>/dev/null; then
+        echo "gebruiker $gebruiker bestaat al."
+    else
+        useradd -K UID_MIN=2500 -g "$groepsnaam" -s /bin/bash -m "$gebruiker"
+        if [ $? -eq 0 ]; then
+            echo "gebruiker $gebruiker aangemaakt."
+        else
+            echo "Fout: gebruiker $gebruiker kon niet worden aangemaakt."
+            exit 1
+        fi
+    fi
+
+    # stel het paswoord in voor de gebruiker, dit moet interactief gebeuren
+    echo "stel een paswoord in voor $gebruiker:"
+    passwd "$gebruiker"
+
+    # gebruiker moet paswoord wijzigen bij eerste login en paswoord verloopt na 40 dagen
+    chage -d 0 "$gebruiker"
+    chage -M 40 "$gebruiker"
+    echo "paswoordbeleid ingesteld voor $gebruiker."
+done
+
+
+# voeg alle users toe aan de groep
+for gebruiker in "$admin" "$user1" "$user2"; do
+    usermod -aG "$groepsnaam" "$gebruiker"
+    echo "gebruiker $gebruiker is lid van groep $groepsnaam."
+done
 
 
 # stel eigenaarschap in van de twee directories
@@ -213,4 +247,3 @@ echo "script beeindigd."
 # GEBRUIK VAN AI
 # line 125 tot 144 heb ik AI gebruikt omdat ik niet goed wist hoe te formatten en de volgorde van de functions.
 # de kleuren heb ik gevonden op fora. AI heeft een suggestie gegeven omdat ik ${NC} was vergeten.
-
