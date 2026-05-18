@@ -1,8 +1,5 @@
-
 #!/bin/bash
 #
-
-
 # variables
 afdeling="$1"
 groepsnaam="${afdeling}-gr"
