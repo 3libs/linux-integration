@@ -1,4 +1,8 @@
-https://drive.google.com/file/d/1Xxz-Ea2LEV9esEIV0Tc6E7hDzME3FKEm/view?usp=drivesdk#!/bin/bash
+karsten-maakafdeling.sh
+Pagina
+/1
+
+#!/bin/bash
 #
 
 
@@ -7,6 +11,7 @@ afdeling="$1"
 groepsnaam="${afdeling}-gr"
 voornaam="karsten"
 basisdir="/$voornaam"
+admin="${afdeling}-admin"
 # variables
 
 
@@ -25,8 +30,6 @@ NC='\033[0m'
 # _____________________________________________________________________________________________________________
 #
 # check of script als root word uitgevoerd
-
-
 if [ "$(id -u)" -ne 0 ]; then
     echo -e "${RED}Fout: script moet als root worden uitgevoerd.${NC}"
     exit 1
@@ -43,7 +46,7 @@ if [ $# -eq 0 ]; then
     echo
     echo "Gebruik: $0 <afdelingsnaam>"
     echo
-    
+
     # loading animation om het wachten wat minder saai te maken
     # source: https://stackoverflow.com/questions/12498304/creating-a-simple-loading-animation-in-bash
 
@@ -56,16 +59,17 @@ if [ $# -eq 0 ]; then
 fi
 
 # ------------  EINDE block met checks om te controleren of het script correct word uitgevoerd ----------------
-# _____________________________________________________________________________________________________________
+#
 #
 # ---------------------- START block met de daadwerkelijke uitvoering van het script --------------------------
-# _____________________________________________________________________________________________________________
+# 
 
 
 echo -e "het volgende zal worden uitgevoerd:${NC}"
 echo -e "1. Er zal een groep worden aangemaakt met de naam ${YELLOW}$groepsnaam${NC}.${NC}"
 echo -e "2. Er zal een directory worden aangemaakt in de root directory met de naam ${YELLOW}$basisdir${NC}.${NC}"
 echo -e "3. Er zullen twee subdirectories worden aangemaakt in ${YELLOW}$basisdir${NC}, genaamd ${YELLOW}${afdeling}-RWdocs${NC} en ${YELLOW}${afdeling}-ROdocs${NC}.${NC}"
+echo -e "4. Er zal een admin gebruiker worden aangemaakt met de naam ${YELLOW}$admin${NC}.${NC}"
 echo -e "Voer het script opnieuw uit als u deze acties wilt uitvoeren.${NC}"
 echo
 sleep 0.5
@@ -120,12 +124,95 @@ else
     echo "directory $basisdir/${afdeling}-ROdocs aangemaakt."
 fi
 
+
+# maakt de admin gebruiker aan met een uid tussen 5500 en 5600
+if id "$admin" &>/dev/null; then
+    echo "gebruiker $admin bestaat al."
+else
+    uid=5500
+    while getent passwd "$uid" >/dev/null; do
+        uid=$((uid + 1))
+        if [ "$uid" -gt 5600 ]; then
+            echo "Fout: geen vrije uid gevonden tussen 5500 en 5600."
+            exit 1
+        fi
+    done
+
+    useradd -u "$uid" -g "$groepsnaam" -s /bin/sh -m "$admin"
+    if [ $? -eq 0 ]; then
+        echo "gebruiker $admin aangemaakt met uid $uid."
+    else
+        echo "Fout: gebruiker $admin kon niet worden aangemaakt."
+        exit 1
+    fi
+fi
+
+# stel het paswoord in voor de admin, dit moet interactief gebeuren
+echo "stel een paswoord in voor $admin:"
+passwd "$admin"
+
+# gebruiker moet paswoord wijzigen bij eerste login en paswoord verloopt na 40 dagen
+chage -d 0 "$admin"
+chage -M 40 "$admin"
+echo "paswoordbeleid ingesteld voor $admin."
+
+
+# voeg de admin toe aan de groep
+usermod -aG "$groepsnaam" "$admin"
+echo "gebruiker $admin is lid van groep $groepsnaam."
+
+
+# stel eigenaarschap in van de twee directories
+chown "$admin":"$groepsnaam" "$basisdir/${afdeling}-RWdocs"
+chown "$admin":"$groepsnaam" "$basisdir/${afdeling}-ROdocs"
+echo "eigenaarschap van de directories ingesteld op $admin:$groepsnaam."
+
+# stel rechten in op de RWdocs directory
+# 1664: sticky bit zodat enkel de eigenaar bestanden kan wissen, eigenaar rw, groep rw, anderen r
+chmod 1664 "$basisdir/${afdeling}-RWdocs"
+echo "rechten op ${afdeling}-RWdocs ingesteld op 1664."
+
+# stel rechten in op de ROdocs directory
+# 1640: sticky bit zodat enkel de eigenaar bestanden kan wissen, eigenaar rw, groep r, anderen geen rechten
+chmod 1640 "$basisdir/${afdeling}-ROdocs"
+echo "rechten op ${afdeling}-ROdocs ingesteld op 1640."
+
+
+# maakt een bestand aan in de hoofddirectory met de vereiste inhoud
+echo "This file is created by the script" > "$basisdir/demodoc"
+echo "bestand $basisdir/demodoc aangemaakt."
+
+
 sleep 0.5
-echo "Alle directories zijn succesvol aangemaakt."
+echo "Alle directories en gebruikers zijn succesvol aangemaakt."
 
 
+# toont de eerste 5 groepen uit het groepenbestand in alfabetische volgorde
+echo
+echo "de eerste 5 groepen uit het groepenbestand in alfabetische volgorde:"
+sort /etc/group | head -5
 
 
+# toont de laatste 4 gebruikers uit het gebruikersbestand in omgekeerde alfabetische volgorde
+echo
+echo "de laatste 4 gebruikers uit het gebruikersbestand in omgekeerde alfabetische volgorde:"
+sort -r /etc/passwd | head -4
+
+
+# toont alle gebruikers waarvan de naam begint met sys
+echo
+echo "alle gebruikers waarvan de naam begint met 'sys':"
+grep "^sys" /etc/passwd
+
+
+# toont de lange directory inhoud van de hoofddirectory inclusief verborgen bestanden
+echo
+echo "directory inhoud van $basisdir (inclusief verborgen bestanden, rechten en eigenaarschap):"
+ls -la "$basisdir"
+
+
+echo
+echo "script beeindigd."
 
 
 # INSTRUCTIES HOE TE GEBRUIKEN
@@ -134,3 +221,8 @@ echo "Alle directories zijn succesvol aangemaakt."
 # 3. voer het script uit met root rechten en geef de naam van de afdeling als argument mee, bijvoorbeeld: sudo bash karsten-maakafdeling.sh sales
 # 4. het script zal controleren of het correct word uitgevoerd en zal vervolgens de groep en directories aanmaken zoals beschreven
 
+# GEBRUIK VAN AI
+# line 125 tot 144 heb ik AI gebruikt omdat ik niet goed wist hoe te formatten en de volgorde van de functions.
+# de kleuren heb ik gevonden op fora. AI heeft een suggestie gegeven omdat ik ${NC} was vergeten.
+
+karsten-maakafdeling.sh wordt weergegeven.
