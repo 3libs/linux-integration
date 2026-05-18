@@ -15,11 +15,6 @@ admin="${afdeling}-admin"
 # kleuren voor de output
 # source: https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux
 # source: https://askubuntu.com/questions/517677/how-do-i-get-a-colored-bash
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-NC='\033[0m'
 # kleuren voor de output
 
 
@@ -28,17 +23,17 @@ NC='\033[0m'
 #
 # check of script als root word uitgevoerd
 if [ "$(id -u)" -ne 0 ]; then
-    echo -e "${RED}Fout: script moet als root worden uitgevoerd.${NC}"
+    echo -e "Fout: script moet als root worden uitgevoerd."
     exit 1
 fi
 # check of script word uitgevoerd op een linux systeem
 if [ "$(uname -s)" != "Linux" ]; then
-    echo -e "${RED}Fout: script is alleen bedoeld voor Linux systemen.${NC}"
+    echo -e "Fout: script is alleen bedoeld voor Linux systemen."
     exit 1
 fi
 # controleer of een afdelingsnaam wel als argument is meegegeven
 if [ $# -eq 0 ]; then
-    echo -e "${RED}Fout: er is geen afdelingsnaam opgegeven.${NC}"
+    echo -e "Fout: er is geen afdelingsnaam opgegeven."
     sleep 0.5
     echo
     echo "Gebruik: $0 <afdelingsnaam>"
@@ -62,12 +57,12 @@ fi
 # 
 
 
-echo -e "het volgende zal worden uitgevoerd:${NC}"
-echo -e "1. Er zal een groep worden aangemaakt met de naam ${YELLOW}$groepsnaam${NC}.${NC}"
-echo -e "2. Er zal een directory worden aangemaakt in de root directory met de naam ${YELLOW}$basisdir${NC}.${NC}"
-echo -e "3. Er zullen twee subdirectories worden aangemaakt in ${YELLOW}$basisdir${NC}, genaamd ${YELLOW}${afdeling}-RWdocs${NC} en ${YELLOW}${afdeling}-ROdocs${NC}.${NC}"
-echo -e "4. Er zal een admin gebruiker worden aangemaakt met de naam ${YELLOW}$admin${NC}.${NC}"
-echo -e "Voer het script opnieuw uit als u deze acties wilt uitvoeren.${NC}"
+echo -e "het volgende zal worden uitgevoerd:"
+echo -e "1. Er zal een groep worden aangemaakt met de naam."
+echo -e "2. Er zal een directory worden aangemaakt in de root directory met de naam."
+echo -e "3. Er zullen twee subdirectories worden aangemaakt in, genaamd ${afdeling}-RWdocs en ${afdeling}-ROdocs."
+echo -e "4. Er zal een admin gebruiker worden aangemaakt met de naam $admin."
+echo -e "Voer het script opnieuw uit als u deze acties wilt uitvoeren."
 echo
 sleep 0.5
 read -p "Wilt u doorgaan? (y/n) " antwoord
