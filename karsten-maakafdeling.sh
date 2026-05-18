@@ -222,4 +222,3 @@ echo "script beeindigd."
 # line 125 tot 144 heb ik AI gebruikt omdat ik niet goed wist hoe te formatten en de volgorde van de functions.
 # de kleuren heb ik gevonden op fora. AI heeft een suggestie gegeven omdat ik ${NC} was vergeten.
 
-karsten-maakafdeling.sh wordt weergegeven.
