@@ -1,6 +1,3 @@
-karsten-maakafdeling.sh
-Pagina
-/1
 
 #!/bin/bash
 #
